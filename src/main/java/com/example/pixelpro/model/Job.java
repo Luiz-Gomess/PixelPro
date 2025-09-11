@@ -1,6 +1,11 @@
 package com.example.pixelpro.model;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.Instant;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.pixelpro.enums.JobStatus;
 import com.example.pixelpro.enums.OperationType;
@@ -31,6 +36,7 @@ public class Job {
     private Instant receivedAt;
     private Instant finishedAt;
 
+    private String imageFilename;
     @Lob
     @Basic(fetch = FetchType.LAZY)
     private byte[] originalImage;
@@ -38,11 +44,15 @@ public class Job {
     private String imageResult;
     
 
-    public Job ( OperationType operationType) {
+    public Job (OperationType operationType) {
         this.status = JobStatus.PENDING;
         this.operationType = operationType;
         this.receivedAt = Instant.now();
-        // this.originalImage = originalImage;
+    }
+
+    public void addOriginalImage (MultipartFile image) throws IOException {
+        this.originalImage = image.getBytes();
+        this.imageFilename = image.getOriginalFilename();
     }
 
     
@@ -51,16 +61,12 @@ public class Job {
         this.status = JobStatus.PENDING;
         this.receivedAt = Instant.now();
     }
-
-
-
     public Long getId() {
         return id;
     }
     public void setId(Long id) {
         this.id = id;
     }
-
     public JobStatus getStatus() {
         return status;
     }
@@ -84,6 +90,12 @@ public class Job {
     }
     public byte[] getOriginalImage() {
         return originalImage;
+    }
+    public String getImageFilename() {
+        return imageFilename;
+    }
+    public void setImageFilename(String imageFilename) {
+        this.imageFilename = imageFilename;
     }
     public void setOriginalImage(byte[] originalImage) {
         this.originalImage = originalImage;

@@ -41,16 +41,13 @@ public class ImageController {
             ObjectMapper mapper = new ObjectMapper();
             Job job = mapper.readValue(jobData, Job.class);
 
-            job.setOriginalImage(image.getBytes());
-            System.out.println(job.getOriginalImage().length);
-            System.out.println(image.getSize());
+            job.addOriginalImage(image);
+            
             rabbitTemplate.convertAndSend(RabbitMQConfig.QUEUE_SAVING, job);
         } catch (IOException e) {
             return ResponseEntity.status(500).body("Error processing image");
         }
 
-        // repository.save(job);
-        // rabbitTemplate.convertAndSend(RabbitMQConfig.QUEUE_PROCESSING, job);
 
         return ResponseEntity.accepted().body("Job received and being processed.");
     }
