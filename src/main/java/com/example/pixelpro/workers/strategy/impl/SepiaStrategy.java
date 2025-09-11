@@ -1,4 +1,4 @@
-package com.example.pixelpro.workers.strategy;
+package com.example.pixelpro.workers.strategy.impl;
 
 import java.io.ByteArrayOutputStream;
 
@@ -6,10 +6,10 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.opencv_core.*;
-
+import org.bytedeco.opencv.opencv_core.Mat;
 
 import com.example.pixelpro.model.Job;
+import com.example.pixelpro.workers.strategy.ImageProcessorStrategy;
 
 public class SepiaStrategy implements ImageProcessorStrategy{
 
@@ -33,6 +33,9 @@ public class SepiaStrategy implements ImageProcessorStrategy{
 
         Mat sepia = new Mat();
         opencv_core.transform(image, sepia, sepiaKernel);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        opencv_imgcodecs.imwrite(job.getImageFilename(), sepia);
 
 
     }

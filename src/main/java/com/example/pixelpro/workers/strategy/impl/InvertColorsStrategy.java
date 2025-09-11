@@ -1,14 +1,14 @@
 package com.example.pixelpro.workers.strategy.impl;
 
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 
 import com.example.pixelpro.model.Job;
 import com.example.pixelpro.workers.strategy.ImageProcessorStrategy;
 
-public class GrayscaleStrategy implements ImageProcessorStrategy{
+public class InvertColorsStrategy implements ImageProcessorStrategy {
 
     @Override
     public void process(Job job) {
@@ -17,19 +17,11 @@ public class GrayscaleStrategy implements ImageProcessorStrategy{
 
         // Converter os bytes em Mat usando imdecode
         Mat image = opencv_imgcodecs.imdecode(new Mat(new BytePointer(imageBytes)), opencv_imgcodecs.IMREAD_COLOR);
-
-        if (image.empty()) {
-            throw new RuntimeException("Não foi possível decodificar a imagem!");
-        }
-
-        // Criar matriz para grayscale
         Mat grayImage = new Mat();
 
-        // Converter para escala de cinza
-        opencv_imgproc.cvtColor(image, grayImage, opencv_imgproc.COLOR_BGR2GRAY);
-
-        // Salvar a imagem processada em disco
-        opencv_imgcodecs.imwrite(job.getImageFilename(), grayImage);
+        // Invert colors
+        opencv_core.bitwise_not(image, grayImage);
+        opencv_imgcodecs.imwrite( job.getImageFilename(), grayImage);
     }
     
 }

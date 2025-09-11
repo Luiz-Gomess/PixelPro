@@ -19,7 +19,6 @@ public class ImageServices {
         opencv_core.bitwise_not(image, grayImage);
 
         opencv_imgcodecs.imwrite("edited_image.jpg", grayImage);
-        opencv_imgcodecs.imwrite("edited_image.jpg", grayImage);
 
     }
 }
