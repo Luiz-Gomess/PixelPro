@@ -16,6 +16,7 @@ import com.example.pixelpro.services.ImageServices;
 @Component
 public class ImageWorker {
 
+    @Autowired
     RabbitTemplate rabbitTemplate;
     
     @Autowired
@@ -31,7 +32,7 @@ public class ImageWorker {
         repository.save(job);
         rabbitTemplate.convertAndSend(RabbitMQConfig.QUEUE_PROCESSING, job);
     }
-    
+
     
     @RabbitListener(queues = RabbitMQConfig.QUEUE_PROCESSING)
     public void processImage(Job job) {

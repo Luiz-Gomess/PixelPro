@@ -5,12 +5,13 @@ import java.util.List;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +19,7 @@ import com.example.pixelpro.config.RabbitMQConfig;
 import com.example.pixelpro.enums.JobStatus;
 import com.example.pixelpro.model.Job;
 import com.example.pixelpro.repository.JobRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 
@@ -32,16 +34,21 @@ public class ImageController {
     @Autowired
     JobRepository repository;
     
-    @PostMapping
-    public ResponseEntity<String> process (@RequestBody Job job, MultipartFile image) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> process (@RequestPart("imagem") MultipartFile image, @RequestPart("dados") String jobData) {
 
         try {
+            ObjectMapper mapper = new ObjectMapper();
+            Job job = mapper.readValue(jobData, Job.class);
+
             job.setOriginalImage(image.getBytes());
+            System.out.println(job.getOriginalImage().length);
+            System.out.println(image.getSize());
+            rabbitTemplate.convertAndSend(RabbitMQConfig.QUEUE_SAVING, job);
         } catch (IOException e) {
             return ResponseEntity.status(500).body("Error processing image");
         }
 
-        rabbitTemplate.convertAndSend(RabbitMQConfig.QUEUE_SAVING, job);
         // repository.save(job);
         // rabbitTemplate.convertAndSend(RabbitMQConfig.QUEUE_PROCESSING, job);
 
