@@ -1,7 +1,5 @@
 package com.example.pixelpro.model;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Instant;
 
@@ -41,7 +39,9 @@ public class Job {
     @Basic(fetch = FetchType.LAZY)
     private byte[] originalImage;
 
-    private String imageResult;
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    private byte[] imageResult;
     
 
     public Job (OperationType operationType) {
@@ -100,10 +100,10 @@ public class Job {
     public void setOriginalImage(byte[] originalImage) {
         this.originalImage = originalImage;
     }
-    public String getImageResult() {
+    public byte[] getImageResult() {
         return imageResult;
     }
-    public void setImageResult(String imageResult) {
+    public void setImageResult(byte[] imageResult) {
         this.imageResult = imageResult;
     }
     

@@ -1,5 +1,8 @@
 package com.example.pixelpro.workers.strategy.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -11,7 +14,7 @@ import com.example.pixelpro.workers.strategy.ImageProcessorStrategy;
 public class GrayscaleStrategy implements ImageProcessorStrategy{
 
     @Override
-    public void process(Job job) {
+    public ByteArrayOutputStream process(Job job) {
 
         byte[] imageBytes = job.getOriginalImage();
 
@@ -30,6 +33,26 @@ public class GrayscaleStrategy implements ImageProcessorStrategy{
 
         // Salvar a imagem processada em disco
         opencv_imgcodecs.imwrite(job.getImageFilename(), grayImage);
+
+        BytePointer buf = new BytePointer();
+        opencv_imgcodecs.imencode(".jpg", grayImage, buf);
+
+        // Converter para ByteArrayOutputStream
+        byte[] bytes = new byte[(int) buf.limit()];
+        buf.get(bytes);
+        buf.deallocate(); // libera memória nativa
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            baos.write(bytes);
+            // job.setImageResult(baos.toByteArray());
+            // jobsRepository.save(job);
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return baos;
     }
     
 }

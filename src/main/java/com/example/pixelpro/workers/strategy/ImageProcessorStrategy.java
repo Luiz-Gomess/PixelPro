@@ -1,7 +1,9 @@
 package com.example.pixelpro.workers.strategy;
 
+import java.io.ByteArrayOutputStream;
+
 import com.example.pixelpro.model.Job;
 
 public interface ImageProcessorStrategy {
-    void process (Job job);
+    ByteArrayOutputStream process (Job job);
 }

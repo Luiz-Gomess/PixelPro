@@ -1,5 +1,6 @@
 package com.example.pixelpro.workers;
 
+import java.io.ByteArrayOutputStream;
 import java.time.Instant;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -42,13 +43,14 @@ public class ImageWorker {
             
             System.out.println("Processing image with id: " + job.getId());
             ImageProcessorStrategy strategy = StrategyFactory.getStrategy(job.getOperationType());
-            strategy.process(job);
+            ByteArrayOutputStream imageResult = strategy.process(job);
+            job.setImageResult(imageResult.toByteArray());
+            System.out.println( job.getImageResult().length);
 
             System.out.println("Processing completed");
     
             job.setStatus(JobStatus.COMPLETED);
             job.setFinishedAt(Instant.now());
-            job.setImageResult(job.getImageFilename() + "_processed");
             
         } catch (Exception e) {
             System.out.println("Error processing image: " + e.getMessage());

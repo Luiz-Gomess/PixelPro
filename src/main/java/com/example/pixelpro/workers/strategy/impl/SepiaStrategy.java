@@ -1,20 +1,26 @@
 package com.example.pixelpro.workers.strategy.impl;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.example.pixelpro.model.Job;
+import com.example.pixelpro.repository.JobRepository;
 import com.example.pixelpro.workers.strategy.ImageProcessorStrategy;
 
 public class SepiaStrategy implements ImageProcessorStrategy{
 
+    // @Autowired
+    // private JobRepository jobsRepository;
+
     @Override
-    public void process(Job job) {
+    public ByteArrayOutputStream process(Job job) {
 
         Mat image = new Mat(new BytePointer(job.getOriginalImage()));
         image = opencv_imgcodecs.imdecode(image, opencv_imgcodecs.IMREAD_COLOR);
@@ -34,8 +40,31 @@ public class SepiaStrategy implements ImageProcessorStrategy{
         Mat sepia = new Mat();
         opencv_core.transform(image, sepia, sepiaKernel);
 
+        // Usar BytePointer como buffer para imencode
+        BytePointer buf = new BytePointer();
+        opencv_imgcodecs.imencode(".jpg", sepia, buf);
+
+        // Converter para ByteArrayOutputStream
+        byte[] bytes = new byte[(int) buf.limit()];
+        buf.get(bytes);
+        buf.deallocate(); // libera memória nativa
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            baos.write(bytes);
+            // job.setImageResult(baos.toByteArray());
+            // jobsRepository.save(job);
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
         opencv_imgcodecs.imwrite(job.getImageFilename(), sepia);
+        return baos;
+
+        // Opcional: salvar em disco
+
+        
 
 
     }

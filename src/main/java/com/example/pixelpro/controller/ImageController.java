@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,11 +19,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.pixelpro.config.RabbitMQConfig;
 import com.example.pixelpro.enums.JobStatus;
 import com.example.pixelpro.model.Job;
+import com.example.pixelpro.model.JobListDTO;
+import com.example.pixelpro.model.JobPostDTO;
 import com.example.pixelpro.repository.JobRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
-
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("api/v1/job")
@@ -35,26 +37,29 @@ public class ImageController {
     JobRepository repository;
     
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> process (@RequestPart("imagem") MultipartFile image, @RequestPart("dados") String jobData) {
+    public ResponseEntity<String> process (
+        @RequestPart("imagem") MultipartFile image, 
+        @Valid @RequestPart("dados") JobPostDTO jobData ) {
 
         try {
             ObjectMapper mapper = new ObjectMapper();
-            Job job = mapper.readValue(jobData, Job.class);
+
+            String json = mapper.writeValueAsString(jobData);
+            Job job = mapper.readValue(json, Job.class);
 
             job.addOriginalImage(image);
-            
             rabbitTemplate.convertAndSend(RabbitMQConfig.QUEUE_SAVING, job);
+
         } catch (IOException e) {
-            return ResponseEntity.status(500).body("Error processing image");
+            return ResponseEntity.status(500).body("Error processing image: " + e.getMessage());
         }
-
-
+        
         return ResponseEntity.accepted().body("Job received and being processed.");
     }
 
     @GetMapping
-    public ResponseEntity<List<Job>> list() {
-        return ResponseEntity.ok(repository.findAll());
+    public ResponseEntity<List<JobListDTO>> list() {
+        return ResponseEntity.ok(repository.findAll().stream().map(JobListDTO::new).toList());
     }
     
 
@@ -65,22 +70,10 @@ public class ImageController {
             return ResponseEntity.status(404).body("Job not found");
         }
 
-        String message = "";
-
-        switch (job.getStatus()) {
-            case JobStatus.PENDING:
-                message = "Your job is still pending.";
-                break;
-            case JobStatus.ON_PROGRESS:
-                message = "Your job is being processed!";
-                break;
-            case JobStatus.COMPLETED:
-                message = "Your job with" + job.getOperationType() + " is completed!";
-                return ResponseEntity.ok().body(job);
-            default:
-                break;
-        }
-        return ResponseEntity.ok().body(message);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=sepia.jpg")
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(job.getImageResult());
 
     }
     
