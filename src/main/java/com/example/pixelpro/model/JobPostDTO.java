@@ -1,12 +1,12 @@
 package com.example.pixelpro.model;
 
-import com.example.pixelpro.utils.factories.validators.OperationType;
+import com.example.pixelpro.utils.validators.OperationTypeEnumValidator;
 
 
 public class JobPostDTO {
 
     
-    @OperationType
+    @OperationTypeEnumValidator
     private String operationType;
 
     // getter e setter
