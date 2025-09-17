@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.pixelpro.config.RabbitMQConfig;
-import com.example.pixelpro.enums.JobStatus;
 import com.example.pixelpro.model.Job;
 import com.example.pixelpro.model.JobListDTO;
 import com.example.pixelpro.model.JobPostDTO;
@@ -42,6 +41,7 @@ public class ImageController {
         @Valid @RequestPart("dados") JobPostDTO jobData ) {
 
         try {
+
             ObjectMapper mapper = new ObjectMapper();
 
             String json = mapper.writeValueAsString(jobData);
@@ -71,7 +71,7 @@ public class ImageController {
         }
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=sepia.jpg")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + job.getImageFilename() + "_" + job.getOperationType() + ".jpg")
                 .contentType(MediaType.IMAGE_JPEG)
                 .body(job.getImageResult());
 

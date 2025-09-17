@@ -11,13 +11,13 @@ public class OperationTypeValidator implements ConstraintValidator<OperationType
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-
-        String enumValue;
+        OperationType enumValue;
         try {
-            enumValue = OperationType.valueOf(value.toUpperCase()).name();
+            enumValue = OperationType.valueOf(value.toUpperCase());
         } catch (Exception e) {
             return false;
         }
+ 
         // If the value received is one of the enum values, it's valid.
         if (Arrays
                 .asList(OperationType.values())
