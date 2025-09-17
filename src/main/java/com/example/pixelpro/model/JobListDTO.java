@@ -11,7 +11,8 @@ public record JobListDTO(
     OperationType operationType,
     Instant receivedAt,
     Instant finishedAt,
-    String imageFilename
+    String imageFilename,
+    String urlResultImage
 ) {
     
     public JobListDTO (Job job) {
@@ -21,7 +22,8 @@ public record JobListDTO(
             job.getOperationType(),
             job.getReceivedAt(),
             job.getFinishedAt(),
-            job.getImageFilename()
+            job.getImageFilename(),
+            "http://localhost:8088/api/v1/job/" + job.getId()
         );
     }
 
