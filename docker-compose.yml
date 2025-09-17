@@ -1,0 +1,75 @@
+services:
+  app:
+    build: .
+    container_name: pixelpro
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/pixelpro
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+    ports:
+      - "8088:8080"
+    volumes:
+      - .:/pixelpro
+    depends_on:
+      db:
+        condition: service_healthy
+      # ✅ Adicione a dependência do RabbitMQ aqui
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - pixelpro-network
+  db:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      - POSTGRES_DB=pixelpro
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      
+    ports:
+      - "5433:5432" 
+    volumes:
+      - postgres_data:/var/lib/postgresql/data 
+    restart: always 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pixelpro"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    networks:
+      - pixelpro-network
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: rabbitmq
+    ports:
+      # Porta para a aplicação: 5672
+      - "5672:5672"
+      # Porta para a interface de gerenciamento web: 15672
+      - "15672:15672"
+    # Você pode definir usuários/senhas aqui se não quiser usar o padrão guest/guest
+    # environment:
+    #   - RABBITMQ_DEFAULT_USER=meu_user
+    #   - RABBITMQ_DEFAULT_PASS=minha_senha_forte
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - pixelpro-network
+
+volumes:
+  rabbitmq_data: 
+  postgres_data:
+
+networks:
+  pixelpro-network:
+    driver: bridge
