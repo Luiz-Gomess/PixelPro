@@ -46,7 +46,7 @@ public class ImageController {
 
         try {
             Job job = jobService.map(jobData, image);
-            rabbitTemplate.convertAndSend(RabbitMQConfig.QUEUE_SAVING, job);
+            rabbitTemplate.convertAndSend(RabbitMQConfig.DIRECT_EXCHANGE,RabbitMQConfig.SAVE_ROUTING_KEY, job);
 
         } catch (IOException e) {
             return ResponseEntity.status(500).body("Error processing image: " + e.getMessage());

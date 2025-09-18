@@ -1,11 +1,11 @@
 package com.example.pixelpro.utils.factories;
 
+import com.example.pixelpro.consumers.strategy.ImageProcessorStrategy;
+import com.example.pixelpro.consumers.strategy.impl.BlurStrategy;
+import com.example.pixelpro.consumers.strategy.impl.GrayscaleStrategy;
+import com.example.pixelpro.consumers.strategy.impl.InvertColorsStrategy;
+import com.example.pixelpro.consumers.strategy.impl.SepiaStrategy;
 import com.example.pixelpro.enums.OperationType;
-import com.example.pixelpro.workers.strategy.ImageProcessorStrategy;
-import com.example.pixelpro.workers.strategy.impl.BlurStrategy;
-import com.example.pixelpro.workers.strategy.impl.GrayscaleStrategy;
-import com.example.pixelpro.workers.strategy.impl.InvertColorsStrategy;
-import com.example.pixelpro.workers.strategy.impl.SepiaStrategy;
 
 public abstract class StrategyFactory {
     

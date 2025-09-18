@@ -1,4 +1,4 @@
-package com.example.pixelpro.workers.strategy;
+package com.example.pixelpro.consumers.strategy;
 
 import java.io.ByteArrayOutputStream;
 

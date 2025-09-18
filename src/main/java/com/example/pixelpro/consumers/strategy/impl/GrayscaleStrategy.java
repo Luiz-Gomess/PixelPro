@@ -1,4 +1,4 @@
-package com.example.pixelpro.workers.strategy.impl;
+package com.example.pixelpro.consumers.strategy.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -8,8 +8,8 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 
+import com.example.pixelpro.consumers.strategy.ImageProcessorStrategy;
 import com.example.pixelpro.model.Job;
-import com.example.pixelpro.workers.strategy.ImageProcessorStrategy;
 
 public class GrayscaleStrategy implements ImageProcessorStrategy{
 
