@@ -8,10 +8,8 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.example.pixelpro.model.Job;
-import com.example.pixelpro.repository.JobRepository;
 import com.example.pixelpro.workers.strategy.ImageProcessorStrategy;
 
 public class SepiaStrategy implements ImageProcessorStrategy{

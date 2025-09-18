@@ -23,7 +23,6 @@ import com.example.pixelpro.model.JobListDTO;
 import com.example.pixelpro.model.JobPostDTO;
 import com.example.pixelpro.repository.JobRepository;
 import com.example.pixelpro.services.JobService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.validation.Valid;
 
@@ -46,13 +45,7 @@ public class ImageController {
         @Valid @RequestPart("dados") JobPostDTO jobData ) {
 
         try {
-
-            ObjectMapper mapper = new ObjectMapper();
-
-            String json = mapper.writeValueAsString(jobData);
-            Job job = mapper.readValue(json, Job.class);
-
-            job.addOriginalImage(image);
+            Job job = jobService.map(jobData, image);
             rabbitTemplate.convertAndSend(RabbitMQConfig.QUEUE_SAVING, job);
 
         } catch (IOException e) {
