@@ -1,6 +1,8 @@
 package com.example.pixelpro.services;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -9,14 +11,25 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.pixelpro.config.MinioConfig;
 import com.example.pixelpro.model.Job;
 import com.example.pixelpro.model.JobListDTO;
 import com.example.pixelpro.model.JobPostDTO;
 import com.example.pixelpro.repository.JobRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.minio.GetObjectArgs;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
+
 @Service
 public class JobService {
+
+    private final String rawImagesFolder = "raw";
+    private final String processedImagesFolder = "processed";
+
+    @Autowired
+    MinioClient minioClient;
     
     @Autowired
     private JobRepository jobRepository;
@@ -35,5 +48,39 @@ public class JobService {
         job.addOriginalImage(image);
 
         return job;
+    }
+
+    public void uploadObject(Long jobId, String objectName, InputStream inputStream, long size, String contentType, boolean newInsertion) {
+        try {
+
+            // Defines the destination folder based on the param.
+            String path = newInsertion == true ? rawImagesFolder : processedImagesFolder;
+            // Uses the jobId to create a unique folder to it's processed image.
+            path = Path.of(path, Long.toString(jobId),objectName).toString();
+
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket(MinioConfig.bucket)
+                            .object(path)
+                            .stream(inputStream, size, -1)
+                            .contentType(contentType)
+                            .build());
+                            
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao fazer upload do arquivo para o MinIO: " + e.getMessage());
+        }
+    }
+
+    public InputStream getObject(Long jobId, String objectName) {
+        try {
+            String path = Path.of(processedImagesFolder, Long.toString(jobId), objectName).toString();
+            return minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(MinioConfig.bucket)
+                            .object(path)
+                            .build());
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao resgatar o arquivo do MinIO: " + e.getMessage());
+        }
     }
 }

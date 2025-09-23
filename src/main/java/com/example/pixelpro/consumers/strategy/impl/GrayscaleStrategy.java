@@ -9,17 +9,14 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 
 import com.example.pixelpro.consumers.strategy.ImageProcessorStrategy;
-import com.example.pixelpro.model.Job;
 
 public class GrayscaleStrategy implements ImageProcessorStrategy{
 
     @Override
-    public ByteArrayOutputStream process(Job job) {
-
-        byte[] imageBytes = job.getOriginalImage();
+    public ByteArrayOutputStream process(byte[] data) {
 
         // Converter os bytes em Mat usando imdecode
-        Mat image = opencv_imgcodecs.imdecode(new Mat(new BytePointer(imageBytes)), opencv_imgcodecs.IMREAD_COLOR);
+        Mat image = opencv_imgcodecs.imdecode(new Mat(new BytePointer(data)), opencv_imgcodecs.IMREAD_COLOR);
 
         if (image.empty()) {
             throw new RuntimeException("Não foi possível decodificar a imagem!");
@@ -31,8 +28,6 @@ public class GrayscaleStrategy implements ImageProcessorStrategy{
         // Converter para escala de cinza
         opencv_imgproc.cvtColor(image, grayImage, opencv_imgproc.COLOR_BGR2GRAY);
 
-        // Salvar a imagem processada em disco
-        opencv_imgcodecs.imwrite(job.getImageFilename(), grayImage);
 
         BytePointer buf = new BytePointer();
         opencv_imgcodecs.imencode(".jpg", grayImage, buf);

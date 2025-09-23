@@ -10,7 +10,6 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 
 import com.example.pixelpro.consumers.strategy.ImageProcessorStrategy;
-import com.example.pixelpro.model.Job;
 
 public class SepiaStrategy implements ImageProcessorStrategy{
 
@@ -18,9 +17,9 @@ public class SepiaStrategy implements ImageProcessorStrategy{
     // private JobRepository jobsRepository;
 
     @Override
-    public ByteArrayOutputStream process(Job job) {
+    public ByteArrayOutputStream process(byte[] data) {
 
-        Mat image = new Mat(new BytePointer(job.getOriginalImage()));
+        Mat image = new Mat(new BytePointer(data));
         image = opencv_imgcodecs.imdecode(image, opencv_imgcodecs.IMREAD_COLOR);
 
         float[] sepiaData = new float[]{
@@ -57,7 +56,7 @@ public class SepiaStrategy implements ImageProcessorStrategy{
             e.printStackTrace();
         }
         
-        opencv_imgcodecs.imwrite(job.getImageFilename(), sepia);
+        // opencv_imgcodecs.imwrite(job.getImageFilename(), sepia);
         return baos;
 
         // Opcional: salvar em disco

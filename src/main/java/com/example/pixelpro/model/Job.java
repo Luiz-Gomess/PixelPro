@@ -17,6 +17,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import jakarta.persistence.Transient;
 
 @Entity
 public class Job {
@@ -35,6 +36,10 @@ public class Job {
     private Instant finishedAt;
 
     private String imageFilename;
+
+    @Transient
+    private MultipartFile image;
+
     @Lob
     @Basic(fetch = FetchType.LAZY)
     private byte[] originalImage;
@@ -51,12 +56,12 @@ public class Job {
     }
 
     public void addOriginalImage (MultipartFile image) throws IOException {
+        this.image = image;
         this.originalImage = image.getBytes();
         this.imageFilename = image.getOriginalFilename();
     }
 
     
-
     public Job() {
         this.status = JobStatus.PENDING;
         this.receivedAt = Instant.now();
@@ -105,6 +110,9 @@ public class Job {
     }
     public void setImageResult(byte[] imageResult) {
         this.imageResult = imageResult;
+    }
+    public MultipartFile getImage () {
+        return this.image;
     }
     
 }

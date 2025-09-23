@@ -10,13 +10,12 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
 
 import com.example.pixelpro.consumers.strategy.ImageProcessorStrategy;
-import com.example.pixelpro.model.Job;
 
 public class BlurStrategy implements ImageProcessorStrategy{
 
     @Override
-    public ByteArrayOutputStream process(Job job) {
-        Mat image = new Mat(new BytePointer(job.getOriginalImage()));
+    public ByteArrayOutputStream process(byte[] data) {
+        Mat image = new Mat(new BytePointer(data));
         image = opencv_imgcodecs.imdecode(image, opencv_imgcodecs.IMREAD_COLOR);
 
         Mat blurred = new Mat();

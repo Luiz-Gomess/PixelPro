@@ -17,7 +17,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      # ✅ Adicione a dependência do RabbitMQ aqui
       rabbitmq:
         condition: service_healthy
     networks:
@@ -49,14 +48,11 @@ services:
     image: rabbitmq:3.13-management-alpine
     container_name: rabbitmq
     ports:
-      # Porta para a aplicação: 5672
-      - "5672:5672"
-      # Porta para a interface de gerenciamento web: 15672
-      - "15672:15672"
-    # Você pode definir usuários/senhas aqui se não quiser usar o padrão guest/guest
-    # environment:
-    #   - RABBITMQ_DEFAULT_USER=meu_user
-    #   - RABBITMQ_DEFAULT_PASS=minha_senha_forte
+      - "5672:5672" # API Rabbit
+      - "15672:15672" # Console Web
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 10s
@@ -65,10 +61,28 @@ services:
       start_period: 10s
     networks:
       - pixelpro-network
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"  # API S3
+      - "9001:9001"  # Console Web
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: password123
+      MINIO_MAIN_BUCKET: pixelpro
+      MINIO_URL: http://localhost:9000
+    volumes:
+      - ./data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - pixelpro-network
 
 volumes:
   rabbitmq_data: 
   postgres_data:
+  minio_data:
+    driver: local
 
 networks:
   pixelpro-network:
