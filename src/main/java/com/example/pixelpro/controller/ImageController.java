@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -30,6 +31,9 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("api/v1/job")
 public class ImageController {
+
+    @Value("${server.custom.address}")
+    private String baseURL;
 
     @Autowired
     RabbitTemplate rabbitTemplate;
@@ -85,7 +89,7 @@ public class ImageController {
         @RequestParam(defaultValue = "0") int pageNo,
         @RequestParam(defaultValue = "10") int pageSize) {
         
-        return ResponseEntity.ok(jobService.getJobs(pageNo, pageSize));
+        return ResponseEntity.ok(jobService.getJobs(pageNo, pageSize, baseURL));
     }
     
 

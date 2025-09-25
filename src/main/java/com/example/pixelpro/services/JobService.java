@@ -34,10 +34,10 @@ public class JobService {
     @Autowired
     private JobRepository jobRepository;
 
-    public Page<JobListDTO> getJobs(int pageNo, int pageSize) {
+    public Page<JobListDTO> getJobs(int pageNo, int pageSize, String baseURL) {
         // Create Pageable object and map results to DTO
         Pageable pageable = PageRequest.of(pageNo, pageSize);
-        return jobRepository.findAll(pageable).map(JobListDTO::new);
+        return jobRepository.findAll(pageable).map(job -> new JobListDTO(job, baseURL));
     }
 
     public Job map(JobPostDTO jobData, String imageIdOnMini, MultipartFile image) throws IOException {

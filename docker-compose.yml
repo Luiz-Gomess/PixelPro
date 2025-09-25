@@ -15,6 +15,7 @@ services:
       - MINIO_MAIN_BUCKET=pixelpro
       - MINI_USER=admin
       - MINI_URL=http://minio:9000
+      - SERVER_CUSTOM_ADDRESS=http://localhost:8089/api/v1/job
     command: mvn spring-boot:run
     working_dir: /app
     ports:
