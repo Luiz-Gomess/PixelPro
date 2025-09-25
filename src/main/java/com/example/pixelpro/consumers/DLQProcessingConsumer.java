@@ -16,12 +16,9 @@ public class DLQProcessingConsumer {
     
     @RabbitListener(queues = RabbitMQConfig.QUEUE_PROCESSING_DLQ)
     public void processDLQMessage(Message message) {
-        String corpoMensagem = new String(message.getBody()); 
+        String messageContent = new String(message.getBody()); 
         
-        log.warn("🚨 [DLQ] Mensagem recebida na Dead Letter Queue de Nota Fiscal!");
-        // log.warn("Conteúdo: {}", corpoMensagem);
-        
-        // A Message original contém headers com informações sobre a falha
+        log.warn("[DLQ] Message received on Processing DLQ: {}", messageContent);
         log.warn("Headers: {}", message.getMessageProperties().getHeaders());
     }
 }
