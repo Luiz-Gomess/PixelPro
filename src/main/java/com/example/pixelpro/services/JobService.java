@@ -39,24 +39,26 @@ public class JobService {
         return jobRepository.findAll(pageable).map(JobListDTO::new);
     }
 
-    public Job map(JobPostDTO jobData, MultipartFile image) throws IOException {
+    public Job map(JobPostDTO jobData, String imageIdOnMini, MultipartFile image) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
 
         String jobDataAsSting = mapper.writeValueAsString(jobData);
         Job job = mapper.readValue(jobDataAsSting, Job.class);
 
-        job.addOriginalImage(image);
+        job.setImageIdOnMini(imageIdOnMini);
+        job.setImageFilename(image.getOriginalFilename());
 
         return job;
     }
 
-    public void uploadObject(Long jobId, String objectName, InputStream inputStream, long size, String contentType, boolean newInsertion) {
+    public void uploadObject(String imageIdOnMini, String objectName, InputStream inputStream, long size, String contentType, boolean newInsertion) {
         try {
 
             // Defines the destination folder based on the param.
             String path = newInsertion == true ? rawImagesFolder : processedImagesFolder;
+
             // Uses the jobId to create a unique folder to it's processed image.
-            path = Path.of(path, Long.toString(jobId),objectName).toString();
+            path = Path.of(path, imageIdOnMini, objectName).toString();
 
             minioClient.putObject(
                     PutObjectArgs.builder()
@@ -71,9 +73,9 @@ public class JobService {
         }
     }
 
-    public InputStream getObject(Long jobId, String objectName) {
+    public InputStream getObject(String imageIdOnMini, String objectName, boolean raw) {
         try {
-            String path = Path.of(processedImagesFolder, Long.toString(jobId), objectName).toString();
+            String path = Path.of(raw ? rawImagesFolder : processedImagesFolder, imageIdOnMini, objectName).toString();
             return minioClient.getObject(
                     GetObjectArgs.builder()
                             .bucket(MinioConfig.bucket)

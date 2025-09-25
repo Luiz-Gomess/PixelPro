@@ -1,7 +1,7 @@
 package com.example.pixelpro.controller;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.UUID;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +46,18 @@ public class ImageController {
         @Valid @RequestPart("dados") JobPostDTO jobData ) {
 
         try {
-            Job job = jobService.map(jobData, image);
+            UUID imageIdOnMini = UUID.randomUUID();
+
+            jobService.uploadObject(
+                imageIdOnMini.toString(), 
+                image.getOriginalFilename(), 
+                image.getInputStream(), 
+                image.getSize(), 
+                image.getContentType(),
+                true
+            );
+
+            Job job = jobService.map(jobData, imageIdOnMini.toString(), image);
             rabbitTemplate.convertAndSend(RabbitMQConfig.DIRECT_EXCHANGE,RabbitMQConfig.SAVE_ROUTING_KEY, job);
 
         } catch (IOException e) {
@@ -60,22 +71,27 @@ public class ImageController {
     public ResponseEntity<Page<JobListDTO>> list(
         @RequestParam(defaultValue = "0") int pageNo,
         @RequestParam(defaultValue = "10") int pageSize) {
+
+        System.out.println("===================== TA FUNCIONANDO ==================");
         
         return ResponseEntity.ok(jobService.getJobs(pageNo, pageSize));
     }
     
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getResult (@PathVariable Long id) {
+    public ResponseEntity<Object> getResult (@PathVariable Long id) throws IOException {
         Job job = repository.findById(id).orElse(null);
         if (job == null) {
             return ResponseEntity.status(404).body("Job not found");
         }
 
+        byte[] content = jobService.getObject(job.getImageIdOnMini(), job.getImageFilename(), false).readAllBytes();
+
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + job.getImageFilename() + "_" + job.getOperationType() + ".jpg")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + job.formatProcessedFileName())
                 .contentType(MediaType.IMAGE_JPEG)
-                .body(job.getImageResult());
+                .contentLength(content.length)
+                .body(content);
 
     }
     
