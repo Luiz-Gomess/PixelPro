@@ -35,6 +35,7 @@ public class JobService {
     private JobRepository jobRepository;
 
     public Page<JobListDTO> getJobs(int pageNo, int pageSize) {
+        // Create Pageable object and map results to DTO
         Pageable pageable = PageRequest.of(pageNo, pageSize);
         return jobRepository.findAll(pageable).map(JobListDTO::new);
     }
@@ -42,6 +43,7 @@ public class JobService {
     public Job map(JobPostDTO jobData, String imageIdOnMini, MultipartFile image) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
 
+        // Map the String DTO to he Job entity.
         String jobDataAsSting = mapper.writeValueAsString(jobData);
         Job job = mapper.readValue(jobDataAsSting, Job.class);
 
@@ -75,6 +77,7 @@ public class JobService {
 
     public InputStream getObject(String imageIdOnMini, String objectName, boolean raw) {
         try {
+            // Defines the source folder based on the param.
             String path = Path.of(raw ? rawImagesFolder : processedImagesFolder, imageIdOnMini, objectName).toString();
             return minioClient.getObject(
                     GetObjectArgs.builder()

@@ -40,28 +40,35 @@ public class ImageWorker {
 
     @RabbitListener(queues = RabbitMQConfig.QUEUE_SAVING)
     public void saveImage(Job job) {
-
         repository.save(job);
-
         rabbitTemplate.convertAndSend(RabbitMQConfig.DIRECT_EXCHANGE, RabbitMQConfig.PROCESS_ROUTING_KEY, job);
     }
 
-    
+    /**
+     * Processes the image based on the job's operation type.
+     * @param job
+     */
     @Transactional
     @RabbitListener(queues = RabbitMQConfig.QUEUE_PROCESSING)
     public void processImage(Job job) {
-
         try {
             job.setStatus(JobStatus.ON_PROGRESS);
             repository.save(job);
 
             log.info("Processing job with id: " + job.getId());
+            // Process the image based on the operation type using Strategy pattern.
             ImageProcessorStrategy strategy = StrategyFactory.getStrategy(job.getOperationType());
             
-            ByteArrayOutputStream imageResult = strategy.process((service.getObject(job.getImageIdOnMini(), job.getImageFilename(), true)).readAllBytes());
+            ByteArrayOutputStream imageResult = strategy.process(
+                (service.getObject(
+                    job.getImageIdOnMini(), 
+                    job.getImageFilename(), 
+                    true)
+                    ).readAllBytes()
+                );
             InputStream is = new ByteArrayInputStream(imageResult.toByteArray());
             
-
+            // Uploads the processed image back to MinIO.
             service.uploadObject(
                 job.getImageIdOnMini(),
                 job.getImageFilename(),
@@ -71,18 +78,17 @@ public class ImageWorker {
                 false
             );
 
-            System.out.println("Processing completed");
+            log.info("Processing completed");
     
             job.setStatus(JobStatus.COMPLETED);
             job.setFinishedAt(Instant.now());
             
         } catch (Exception e) {
-            System.out.println("Error processing image: " + e.getMessage());
+            log.error("Error processing image: " + e.getMessage());
             job.setStatus(JobStatus.FAILED);
             job.setFinishedAt(Instant.now());
 
         } finally {
-
             repository.save(job);
         }
     }

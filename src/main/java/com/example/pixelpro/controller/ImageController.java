@@ -39,7 +39,14 @@ public class ImageController {
 
     @Autowired
     JobRepository repository;
-    
+
+
+    /**
+     * Receives an image and job data, uploads the image to MinIO, maps the data to a Job entity, and sends it to RabbitMQ for processing.
+     * @param image
+     * @param jobData
+     * @return
+     */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> process (
         @RequestPart("imagem") MultipartFile image, 
@@ -67,17 +74,27 @@ public class ImageController {
         return ResponseEntity.accepted().body("Job received and being processed.");
     }
 
+    /**
+     * Lists jobs with pagination.
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
     @GetMapping
     public ResponseEntity<Page<JobListDTO>> list(
         @RequestParam(defaultValue = "0") int pageNo,
         @RequestParam(defaultValue = "10") int pageSize) {
-
-        System.out.println("===================== TA FUNCIONANDO ==================");
         
         return ResponseEntity.ok(jobService.getJobs(pageNo, pageSize));
     }
     
 
+    /**
+     * Fetches the processed image for a given job ID.
+     * @param id
+     * @return
+     * @throws IOException
+     */
     @GetMapping("/{id}")
     public ResponseEntity<Object> getResult (@PathVariable Long id) throws IOException {
         Job job = repository.findById(id).orElse(null);

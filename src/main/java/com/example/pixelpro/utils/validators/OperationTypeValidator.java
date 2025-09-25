@@ -1,30 +1,19 @@
 package com.example.pixelpro.utils.validators;
 
+import com.example.pixelpro.enums.OperationType;
+
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-
-import java.util.Arrays;
-
-import com.example.pixelpro.enums.OperationType;
 
 public class OperationTypeValidator implements ConstraintValidator<OperationTypeEnumValidator, String>{
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        OperationType enumValue;
         try {
-            enumValue = OperationType.valueOf(value.toUpperCase());
-        } catch (Exception e) {
-            return false;
-        }
- 
-        // If the value received is one of the enum values, it's valid.
-        if (Arrays
-                .asList(OperationType.values())
-                .contains(enumValue)) {
+            // If the value received is one of the enum values, it's valid.
+            OperationType.valueOf(value.toUpperCase());
             return true;
-        }
-        else {
+        } catch (Exception e) {
             return false;
         }
     }

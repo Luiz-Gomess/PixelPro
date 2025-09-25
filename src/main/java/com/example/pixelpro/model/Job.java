@@ -48,23 +48,36 @@ public class Job {
         this.receivedAt = Instant.now();
     }
 
+    /**
+     * Formats the processed file name by inserting the operation type before the file extension.
+     */
     public String formatProcessedFileName() {
+        
+        // Handles filenames with multiple dots.
         String[] name = this.imageFilename.split("[.]");
 
+        // Converts into a ArrayList to enable addition and removal of elements.
         ArrayList<String> formatted = new ArrayList<>(Arrays.asList(name));
 
-        String suffix = formatted.getLast();
-        System.out.println(suffix);
+        // Separates the filename and the suffix.
+        String suffix = formatted.removeLast();
+        String filenameWithoutSuffix = String.join(".", formatted);
 
-        int suffixIndex = formatted.lastIndexOf(suffix);
-        System.out.println(suffixIndex);
-
-        formatted.add(
-            suffixIndex,
-            operationType.name()
-        );
-
-        return String.join(".", formatted);
+        // Inserts the operation type right after the filename.
+        filenameWithoutSuffix += "_" + this.operationType.name();
+        // Concatenates the suffix back to the modified filename.
+        String filenameWithSuffix = filenameWithoutSuffix + "." + suffix;
+    
+        return filenameWithSuffix;
     }
     
+    
+    public static void main(String[] args) {
+        
+        Job job = new Job();
+        job.setImageFilename("imagem.teste3.jpg");
+        job.setOperationType(OperationType.GRAYSCALE);
+
+        System.out.println(job.formatProcessedFileName());
+    }
 }
