@@ -1,9 +1,11 @@
 package com.example.pixelpro.controller;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -30,6 +32,9 @@ import jakarta.validation.Valid;
 @RequestMapping("api/v1/job")
 public class ImageController {
 
+    @Value("${server.custom.address}")
+    private String baseURL;
+
     @Autowired
     RabbitTemplate rabbitTemplate;
 
@@ -38,14 +43,32 @@ public class ImageController {
 
     @Autowired
     JobRepository repository;
-    
+
+
+    /**
+     * Receives an image and job data, uploads the image to MinIO, maps the data to a Job entity, and sends it to RabbitMQ for processing.
+     * @param image
+     * @param jobData
+     * @return
+     */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> process (
         @RequestPart("imagem") MultipartFile image, 
         @Valid @RequestPart("dados") JobPostDTO jobData ) {
 
         try {
-            Job job = jobService.map(jobData, image);
+            UUID imageIdOnMini = UUID.randomUUID();
+
+            jobService.uploadObject(
+                imageIdOnMini.toString(), 
+                image.getOriginalFilename(), 
+                image.getInputStream(), 
+                image.getSize(), 
+                image.getContentType(),
+                true
+            );
+
+            Job job = jobService.map(jobData, imageIdOnMini.toString(), image);
             rabbitTemplate.convertAndSend(RabbitMQConfig.DIRECT_EXCHANGE,RabbitMQConfig.SAVE_ROUTING_KEY, job);
 
         } catch (IOException e) {
@@ -55,26 +78,41 @@ public class ImageController {
         return ResponseEntity.accepted().body("Job received and being processed.");
     }
 
+    /**
+     * Lists jobs with pagination.
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
     @GetMapping
     public ResponseEntity<Page<JobListDTO>> list(
         @RequestParam(defaultValue = "0") int pageNo,
         @RequestParam(defaultValue = "10") int pageSize) {
         
-        return ResponseEntity.ok(jobService.getJobs(pageNo, pageSize));
+        return ResponseEntity.ok(jobService.getJobs(pageNo, pageSize, baseURL));
     }
     
 
+    /**
+     * Fetches the processed image for a given job ID.
+     * @param id
+     * @return
+     * @throws IOException
+     */
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getResult (@PathVariable Long id) {
+    public ResponseEntity<Object> getResult (@PathVariable Long id) throws IOException {
         Job job = repository.findById(id).orElse(null);
         if (job == null) {
             return ResponseEntity.status(404).body("Job not found");
         }
 
+        byte[] content = jobService.getObject(job.getImageIdOnMini(), job.getImageFilename(), false).readAllBytes();
+
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + job.getImageFilename() + "_" + job.getOperationType() + ".jpg")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + job.formatProcessedFileName())
                 .contentType(MediaType.IMAGE_JPEG)
-                .body(job.getImageResult());
+                .contentLength(content.length)
+                .body(content);
 
     }
     

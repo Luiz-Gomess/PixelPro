@@ -1,23 +1,21 @@
 package com.example.pixelpro.model;
 
-import java.io.IOException;
 import java.time.Instant;
-
-import org.springframework.web.multipart.MultipartFile;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.example.pixelpro.enums.JobStatus;
 import com.example.pixelpro.enums.OperationType;
 
-import jakarta.persistence.Basic;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
+import lombok.Data;
 
+@Data
 @Entity
 public class Job {
 
@@ -35,13 +33,8 @@ public class Job {
     private Instant finishedAt;
 
     private String imageFilename;
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    private byte[] originalImage;
 
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    private byte[] imageResult;
+    private String imageIdOnMini;
     
 
     public Job (OperationType operationType) {
@@ -49,62 +42,42 @@ public class Job {
         this.operationType = operationType;
         this.receivedAt = Instant.now();
     }
-
-    public void addOriginalImage (MultipartFile image) throws IOException {
-        this.originalImage = image.getBytes();
-        this.imageFilename = image.getOriginalFilename();
-    }
-
     
-
     public Job() {
         this.status = JobStatus.PENDING;
         this.receivedAt = Instant.now();
     }
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public JobStatus getStatus() {
-        return status;
-    }
-    public void setStatus(JobStatus status) {
-        this.status = status;
-    }
-    public OperationType getOperationType() {
-        return operationType;
-    }
-    public void setOperationType(OperationType operationType) {
-        this.operationType = operationType;
-    }
-    public Instant getReceivedAt() {
-        return receivedAt;
-    }
-    public Instant getFinishedAt() {
-        return finishedAt;
-    }
-    public void setFinishedAt(Instant finishedAt) {
-        this.finishedAt = finishedAt;
-    }
-    public byte[] getOriginalImage() {
-        return originalImage;
-    }
-    public String getImageFilename() {
-        return imageFilename;
-    }
-    public void setImageFilename(String imageFilename) {
-        this.imageFilename = imageFilename;
-    }
-    public void setOriginalImage(byte[] originalImage) {
-        this.originalImage = originalImage;
-    }
-    public byte[] getImageResult() {
-        return imageResult;
-    }
-    public void setImageResult(byte[] imageResult) {
-        this.imageResult = imageResult;
+
+    /**
+     * Formats the processed file name by inserting the operation type before the file extension.
+     */
+    public String formatProcessedFileName() {
+        
+        // Handles filenames with multiple dots.
+        String[] name = this.imageFilename.split("[.]");
+
+        // Converts into a ArrayList to enable addition and removal of elements.
+        ArrayList<String> formatted = new ArrayList<>(Arrays.asList(name));
+
+        // Separates the filename and the suffix.
+        String suffix = formatted.removeLast();
+        String filenameWithoutSuffix = String.join(".", formatted);
+
+        // Inserts the operation type right after the filename.
+        filenameWithoutSuffix += "_" + this.operationType.name();
+        // Concatenates the suffix back to the modified filename.
+        String filenameWithSuffix = filenameWithoutSuffix + "." + suffix;
+    
+        return filenameWithSuffix;
     }
     
+    
+    public static void main(String[] args) {
+        
+        Job job = new Job();
+        job.setImageFilename("imagem.teste3.jpg");
+        job.setOperationType(OperationType.GRAYSCALE);
+
+        System.out.println(job.formatProcessedFileName());
+    }
 }

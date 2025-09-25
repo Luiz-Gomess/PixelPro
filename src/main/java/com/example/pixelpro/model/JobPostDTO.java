@@ -5,11 +5,10 @@ import com.example.pixelpro.utils.validators.OperationTypeEnumValidator;
 
 public class JobPostDTO {
 
-    
+    // Uses custom validator to ensure only valid operation types are used.
     @OperationTypeEnumValidator
     private String operationType;
 
-    // getter e setter
     public String getOperationType() {
         return operationType;
     }
