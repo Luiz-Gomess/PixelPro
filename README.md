@@ -1,6 +1,6 @@
 # PixelPro - Processador de Imagens Assíncrono
 
-![Java](https://img.shields.io/badge/Java-21-blue) ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3.5-brightgreen) ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-blueviolet) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-blue) ![MinIO](https://img.shields.io/badge/MinIO-orange) ![Docker](https://img.shields.io/badge/Docker-blue)
+![Java](https://img.shields.io/badge/Java-21-blue) ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.5-brightgreen) ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-blueviolet) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-blue) ![MinIO](https://img.shields.io/badge/MinIO-orange) ![Docker](https://img.shields.io/badge/Docker-blue)
 
 PixelPro é um sistema de processamento de imagens em background, construído com uma arquitetura de microsserviços desacoplada. Ele permite que usuários enviem imagens e solicitem transformações de forma assíncrona, garantindo que a API permaneça sempre responsiva, mesmo durante operações pesadas.
 
