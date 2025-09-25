@@ -1,6 +1,7 @@
 services:
   app:
-    build: .
+    # build: .
+    image: maven:3.9.8-eclipse-temurin-21
     container_name: pixelpro
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/pixelpro
@@ -10,15 +11,24 @@ services:
       - SPRING_RABBITMQ_PORT=5672
       - SPRING_RABBITMQ_USERNAME=guest
       - SPRING_RABBITMQ_PASSWORD=guest
+      - MINI_PASWORD=password123
+      - MINIO_MAIN_BUCKET=pixelpro
+      - MINI_USER=admin
+      - MINI_URL=http://minio:9000
+    command: mvn spring-boot:run
+    working_dir: /app
     ports:
-      - "8088:8080"
+      - "8089:8080"
     volumes:
-      - .:/pixelpro
+      - .:/app
     depends_on:
       db:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      minio:
+        condition: service_started
+
     networks:
       - pixelpro-network
   db:

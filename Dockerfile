@@ -1,3 +1,5 @@
+# Para produção
+
 # Estágio 1: Build da aplicação com Maven e JDK completo
 FROM mcr.microsoft.com/openjdk/jdk:21-ubuntu AS build
 
