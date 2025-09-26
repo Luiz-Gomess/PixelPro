@@ -6,7 +6,7 @@ PixelPro é um sistema de processamento de imagens em background, construído co
 
 ## Conceitos e Tecnologias
 
-O projeto foi desenvolvido para aplicar conceitos avançados de desenvolvimento de software em um cenário prático. As principais tecnologias utilizadas são:
+O projeto foi desenvolvido para aprender e aplicar conceitos avançados de desenvolvimento de software em um cenário prático. As principais tecnologias utilizadas são:
 
 * **Linguagem:** Java 21
 * **Framework:** Spring Boot 3
